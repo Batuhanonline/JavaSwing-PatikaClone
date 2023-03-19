@@ -37,6 +37,40 @@ public class Helper {
         }
     }
 
+    public static boolean isFieldEmpty(JTextField field){
+        return field.getText().trim().isEmpty();
+    }
+
+    public static void showMsg(String str) {
+        optionPageTR();
+        String msg;
+        String title;
+        switch (str) {
+            case "fill" -> {
+                msg = "Lütfen tüm alanları doldurunuz!";
+                title = "Hata";
+            }
+            case "succes" -> {
+                msg = "İşlem başarılı.";
+                title = "Başarılı Sonuç";
+            }
+            case "error" -> {
+                msg = "Bir Hata Oluştu!!!";
+                title = "Hatalı Sonuç";
+            }
+            default -> {
+                msg = str;
+                title = "Mesaj";
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, msg, title, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public static void optionPageTR(){
+        UIManager.put("OptionPane.okButtonText", "Tamam");
+    }
+
 
 
 

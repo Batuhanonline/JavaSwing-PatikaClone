@@ -1,7 +1,9 @@
 package com.patikadev.Model;
 
 import com.patikadev.Helper.DBConnector;
+import com.patikadev.Helper.Helper;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -81,4 +83,56 @@ public class User {
         }
         return users;
     }
+
+    public static boolean add(String fullname, String username, String pass, String type) {
+        String query = "INSERT INTO users (fullname, username, pass, user_type) VALUES (?,?,?,?)";
+        User findUser = User.getFetchByUsername(username);
+        if (findUser != null) {
+            return false;
+        }
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setString(1, fullname);
+            pr.setString(2, username);
+            pr.setString(3, pass);
+            pr.setString(4, type);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static User getFetchByUsername(String username) {
+        User obj = null;
+        String query = "SELECT * FROM users WHERE username = ?";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setString(1, username);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new User((int) rs.getInt("id"), rs.getString("fullname"),
+                        rs.getString("username"), rs.getString("pass"), rs.getString("user_type"));
+            }
+            pr.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return obj;
+    }
+
+    public static boolean delete(int id) {
+        String query = "DELETE FROM users WHERE id = ?";
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, id);
+
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
