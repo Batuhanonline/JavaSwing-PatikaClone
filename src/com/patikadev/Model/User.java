@@ -123,8 +123,32 @@ public class User {
         return obj;
     }
 
+    public static User getFetchById(int id) {
+        User obj = null;
+        String query = "SELECT * FROM users WHERE id = ?";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, id);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new User((int) rs.getInt("id"), rs.getString("fullname"),
+                        rs.getString("username"), rs.getString("pass"), rs.getString("user_type"));
+            }
+            pr.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return obj;
+    }
+
     public static boolean delete(int id) {
         String query = "DELETE FROM users WHERE id = ?";
+        ArrayList<Course> courses = Course.getListByUserId(id);
+        for (Course c : courses){
+            Course.delete(c.getId());
+        }
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1, id);
@@ -184,6 +208,24 @@ public class User {
             query = query.replace("{{type}}", type);
         }
         return query;
+    }
+
+    public static ArrayList<User> getListOnlyEducator() {
+        ArrayList<User> users = new ArrayList<>();
+        String query = "SELECT * FROM users WHERE user_type = 'educator'";
+        User obj;
+        try {
+            Statement st = DBConnector.getInstance().createStatement();
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                obj = new User((int) rs.getInt("id"), rs.getString("fullname"),
+                        rs.getString("username"), rs.getString("pass"), rs.getString("user_type"));
+                users.add(obj);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return users;
     }
 
 }
