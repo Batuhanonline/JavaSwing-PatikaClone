@@ -69,9 +69,21 @@ public class Helper {
 
     public static void optionPageTR(){
         UIManager.put("OptionPane.okButtonText", "Tamam");
+        UIManager.put("OptionPane.yesButtonText", "Evet");
+        UIManager.put("OptionPane.noButtonText", "Hayır");
     }
 
 
+    public static boolean confirm(String str) {
+        String msg;
 
+        switch (str){
+            case "sure" -> {
+                msg = "Bu işlemi gerçekleştirmek istediğine emin misin?";
+            }
+            default -> msg = str;
+        }
 
+        return JOptionPane.showConfirmDialog(null, msg, "!!!", JOptionPane.YES_NO_OPTION) == 0;
+    }
 }
