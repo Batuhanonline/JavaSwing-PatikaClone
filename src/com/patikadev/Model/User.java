@@ -135,4 +135,55 @@ public class User {
         }
     }
 
+    public static boolean update(int id, String fullname, String username, String pass, String type) {
+        String query = "UPDATE users SET fullname = ?, username = ?, pass = ?, user_type = ? WHERE id = ?";
+
+        User findUser = User.getFetchByUsername(username);
+        if (findUser != null && findUser.getId() != id) {
+            return false;
+        }
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setString(1, fullname);
+            pr.setString(2, username);
+            pr.setString(3, pass);
+            pr.setString(4, type);
+            pr.setInt(5, id);
+
+            return pr.executeUpdate() != -1;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static ArrayList<User> searchUserList(String query) {
+        ArrayList<User> users = new ArrayList<>();
+        User obj;
+        try {
+            Statement st = DBConnector.getInstance().createStatement();
+            ResultSet rs = st.executeQuery(query);
+            while (rs.next()) {
+                obj = new User((int) rs.getInt("id"), rs.getString("fullname"),
+                        rs.getString("username"), rs.getString("pass"), rs.getString("user_type"));
+                users.add(obj);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return users;
+    }
+
+    public static String searchQuery(String fullname, String username, String type) {
+        String query = "SELECT * FROM users WHERE username ILIKE '%{{username}}%' AND fullname ILIKE  '%{{fullname}}%'";
+        query = query.replace("{{username}}", username);
+        query = query.replace("{{fullname}}", fullname);
+        if (!type.isEmpty()){
+            query += " AND user_type LIKE '{{type}}'";
+            query = query.replace("{{type}}", type);
+        }
+        return query;
+    }
+
 }

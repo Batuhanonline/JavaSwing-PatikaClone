@@ -5,11 +5,11 @@ import com.patikadev.Model.Operator;
 import com.patikadev.Model.User;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class OperatorGUI extends JFrame {
     private JPanel wrapper;
@@ -28,6 +28,10 @@ public class OperatorGUI extends JFrame {
     private JButton btn_user_add;
     private JTextField fld_user_id;
     private JButton btn_user_delete;
+    private JTextField fld_sh_user_fullname;
+    private JTextField fld_sh_user_username;
+    private JComboBox cmb_sh_user_type;
+    private JButton btn_user_sh;
     private DefaultTableModel model_user_list;
     private Object[] row_user_list;
     private final Operator operator;
@@ -61,6 +65,23 @@ public class OperatorGUI extends JFrame {
         table_user_list.setModel(model_user_list);
         table_user_list.getTableHeader().setReorderingAllowed(false);
 
+        table_user_list.getModel().addTableModelListener(e -> {
+            if (e.getType() == TableModelEvent.UPDATE){
+                int user_id = Integer.parseInt(table_user_list.getValueAt(table_user_list.getSelectedRow(), 0).toString());
+                String user_fullname = table_user_list.getValueAt(table_user_list.getSelectedRow(), 1).toString();
+                String user_username = table_user_list.getValueAt(table_user_list.getSelectedRow(), 2).toString();
+                String user_pass = table_user_list.getValueAt(table_user_list.getSelectedRow(), 3).toString();
+                String user_type = table_user_list.getValueAt(table_user_list.getSelectedRow(), 4).toString();
+
+                if (User.update(user_id, user_fullname, user_username, user_pass, user_type)) {
+                    Helper.showMsg("succes");
+                }
+                loadUserModel();
+            }
+        });
+
+
+        // Tabloda seçili satırın id numarasını kullanıcı girişi olmayan field'a aktarılıyor. Bu sayede sayı dışında bir girdi girmenin önünü kapatmış oluyoruz.
         table_user_list.getSelectionModel().addListSelectionListener(e -> {
             try {
                 String select_user_id = table_user_list.getValueAt(table_user_list.getSelectedRow(), 0).toString();
@@ -109,6 +130,17 @@ public class OperatorGUI extends JFrame {
                 }
             }
         });
+        btn_user_sh.addActionListener(e -> {
+            String fullname = fld_sh_user_fullname.getText();
+            String username = fld_sh_user_username.getText();
+            String type = cmb_sh_user_type.getSelectedItem().toString();
+            String query = User.searchQuery(fullname, username, type);
+            ArrayList<User> searchingUser = User.searchUserList(query);
+            loadUserModel(searchingUser);
+        });
+        btn_logout.addActionListener(e -> {
+            dispose();
+        });
     }
 
     public void loadUserModel() {
@@ -116,6 +148,21 @@ public class OperatorGUI extends JFrame {
         clearModel.setRowCount(0);
 
         for (User obj: User.getList()){
+            int i = 0;
+            row_user_list[i++] = obj.getId();
+            row_user_list[i++] = obj.getFullname();
+            row_user_list[i++] = obj.getUsername();
+            row_user_list[i++] = obj.getPass();
+            row_user_list[i++] = obj.getType();
+            model_user_list.addRow(row_user_list);
+        }
+    }
+
+    public void loadUserModel(ArrayList<User> userList) {
+        DefaultTableModel clearModel = (DefaultTableModel) table_user_list.getModel();
+        clearModel.setRowCount(0);
+
+        for (User obj: userList){
             int i = 0;
             row_user_list[i++] = obj.getId();
             row_user_list[i++] = obj.getFullname();
