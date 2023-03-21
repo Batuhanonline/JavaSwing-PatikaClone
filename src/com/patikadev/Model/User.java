@@ -143,6 +143,38 @@ public class User {
         return obj;
     }
 
+    public static User getFetchLogin(String username, String pass) {
+        User obj = null;
+        String query = "SELECT * FROM users WHERE username = ? AND pass = ?";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setString(1, username);
+            pr.setString(2, pass);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+
+                switch (rs.getString("user_type")){
+                    case "operator" -> obj = new Operator();
+                    case "student" -> obj = new Student();
+                    case "educator" -> obj = new Educator();
+                    default -> obj = new User();
+                }
+
+                obj.setId(rs.getInt("id"));
+                obj.setFullname(rs.getString("fullname"));
+                obj.setUsername(rs.getString("username"));
+                obj.setPass(rs.getString("pass"));
+                obj.setType(rs.getString("user_type"));
+            }
+            pr.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return obj;
+    }
+
     public static boolean delete(int id) {
         String query = "DELETE FROM users WHERE id = ?";
         ArrayList<Course> courses = Course.getListByUserId(id);
