@@ -41,6 +41,26 @@ public class Course {
         }
     }
 
+    public static Course getFetchById(int courseId) {
+        Course obj = null;
+        String query = "SELECT * FROM course WHERE id = ?";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, courseId);
+            ResultSet rs = pr.executeQuery();
+            if (rs.next()) {
+                obj = new Course(rs.getInt("id"), rs.getInt("user_id"), rs.getInt("patika_id"),
+                        rs.getString("name"), rs.getString("programing_lang"));
+            }
+            pr.close();
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
+    }
+
     public int getId() {
         return id;
     }
