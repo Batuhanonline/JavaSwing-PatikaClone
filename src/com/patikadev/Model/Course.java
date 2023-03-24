@@ -30,7 +30,14 @@ public class Course {
 
     public static boolean delete(int id) {
         String query = "DELETE FROM course WHERE id = ?";
-        ArrayList<Course> courses = Course.getListByUserId(id);
+
+        //Olusabilecek sql hatalarindan dolayi bagli olan satirlar silinmelidir.
+        ArrayList<Content> contents = new ArrayList<>();
+        for (Content content : contents) {
+            if (content.getCourse_id() == id) {
+                Content.delete(content.getId());
+            }
+        }
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1, id);

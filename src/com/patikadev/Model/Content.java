@@ -69,6 +69,18 @@ public class Content {
         }
     }
 
+    public static boolean delete(int selectId) {
+        String query = "DELETE FROM content WHERE id = ?";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, selectId);
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public int getId() {
         return id;
     }

@@ -6,12 +6,12 @@ import com.patikadev.Helper.Item;
 import com.patikadev.Model.Content;
 import com.patikadev.Model.Course;
 import com.patikadev.Model.Educator;
-import com.patikadev.Model.Patika;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class EducatorGUI extends JFrame{
     private JPanel wrapper;
@@ -29,6 +29,7 @@ public class EducatorGUI extends JFrame{
     private Object[] row_course_list;
     private DefaultTableModel model_content_list;
     private Object[] row_content_list;
+    private JPopupMenu contentMenu;
 
     public EducatorGUI(Educator educator) {
         add(wrapper);
@@ -62,6 +63,22 @@ public class EducatorGUI extends JFrame{
 
         //-----------------ContentList
 
+        contentMenu = new JPopupMenu();
+        JMenuItem deleteMenu = new JMenuItem("Sil");
+        contentMenu.add(deleteMenu);
+
+        deleteMenu.addActionListener(e -> {
+            if (Helper.confirm("sure")) {
+                int select_id = Integer.parseInt(table_content_list.getValueAt(table_content_list.getSelectedRow(), 0).toString());
+                if (Content.delete(select_id)) {
+                    Helper.showMsg("succes");
+                    loadContentModel(educator.getId());
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
+        });
+
         model_content_list = new DefaultTableModel();
         Object[] col_content_list = {"ID", "Başlık", "Açıklama", "Link", "Eğitim"};
         model_content_list.setColumnIdentifiers(col_content_list);
@@ -71,10 +88,21 @@ public class EducatorGUI extends JFrame{
         loadCourseCombo(educator.getId());
 
         table_content_list.setModel(model_content_list);
+        table_content_list.setComponentPopupMenu(contentMenu);
         table_content_list.getColumnModel().getColumn(0).setMaxWidth(75);
         table_content_list.getTableHeader().setReorderingAllowed(false);
 
+        table_content_list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Point point = e.getPoint();
+                int selected_row = table_content_list.rowAtPoint(point);
+                table_content_list.setRowSelectionInterval(selected_row, selected_row);
+            }
+        });
+
         //####ContentList
+
 
         btn_close.addActionListener(e -> {
             dispose();

@@ -75,6 +75,8 @@ public class Patika {
 
     public static boolean delete(int id) {
         String query = "DELETE FROM patika WHERE id = ?";
+
+        //Olusabilecek sql hatalarindan dolayi bagli olan satirlar silinmelidir.
         ArrayList<Course> courses = Course.getList();
         for (Course c : courses){
             if (c.getPatika().getId() == id) {

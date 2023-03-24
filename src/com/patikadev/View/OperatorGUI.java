@@ -350,9 +350,5 @@ public class OperatorGUI extends JFrame {
             cmb_course_user.addItem(new Item(obj.getId(), obj.getFullname()));
         }
     }
-    public static void main(String[] args) {
-        Helper.setLayout();
-        Operator op = new Operator(1, "Batuhan Güven", "batuhan", "1234", "operator");
-        OperatorGUI operatorGUI = new OperatorGUI(op);
-    }
+
 }
