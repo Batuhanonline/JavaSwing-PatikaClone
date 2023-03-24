@@ -2,9 +2,11 @@ package com.patikadev.View;
 
 import com.patikadev.Helper.Config;
 import com.patikadev.Helper.Helper;
+import com.patikadev.Helper.Item;
 import com.patikadev.Model.Content;
 import com.patikadev.Model.Course;
 import com.patikadev.Model.Educator;
+import com.patikadev.Model.Patika;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -18,6 +20,11 @@ public class EducatorGUI extends JFrame{
     private JTable table_education_list;
     private JTable table_content_list;
     private JButton btn_close;
+    private JTextField fld_content_title;
+    private JTextField fld_content_explanation;
+    private JComboBox cmb_content_course;
+    private JButton btn_course_add;
+    private JTextField fld_content_link;
     private DefaultTableModel model_course_list;
     private Object[] row_course_list;
     private DefaultTableModel model_content_list;
@@ -61,6 +68,7 @@ public class EducatorGUI extends JFrame{
         row_content_list = new Object[col_content_list.length];
 
         loadContentModel(educator.getId());
+        loadCourseCombo(educator.getId());
 
         table_content_list.setModel(model_content_list);
         table_content_list.getColumnModel().getColumn(0).setMaxWidth(75);
@@ -71,6 +79,27 @@ public class EducatorGUI extends JFrame{
         btn_close.addActionListener(e -> {
             dispose();
             LoginGUI loginGUI = new LoginGUI();
+        });
+        btn_course_add.addActionListener(e -> {
+            Item courseItem = (Item) cmb_content_course.getSelectedItem();
+            if (Helper.isFieldEmpty(fld_content_title) || Helper.isFieldEmpty(fld_content_explanation) || Helper.isFieldEmpty(fld_content_link)){
+                Helper.showMsg("fill");
+            } else {
+                String title = fld_content_title.getText();
+                String explanation = fld_content_explanation.getText();
+                String link = fld_content_link.getText();
+                int courseId = courseItem.getKey();
+
+                if (Content.add(courseId, title, explanation, link)){
+                    Helper.showMsg("succes");
+                    loadContentModel(educator.getId());
+                    fld_content_explanation.setText(null);
+                    fld_content_link.setText(null);
+                    fld_content_title.setText(null);
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
         });
     }
 
@@ -104,6 +133,13 @@ public class EducatorGUI extends JFrame{
             row_course_list[i++] = obj.getPatika().getName();
 
             model_course_list.addRow(row_course_list);
+        }
+    }
+
+    public void loadCourseCombo(int id){
+        cmb_content_course.removeAllItems();
+        for (Course course : Course.getListByUserId(id)){
+            cmb_content_course.addItem(new Item(course.getId(), course.getName()));
         }
     }
 }

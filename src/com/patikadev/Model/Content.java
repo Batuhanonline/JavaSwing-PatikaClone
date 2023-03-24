@@ -2,6 +2,7 @@ package com.patikadev.Model;
 
 import com.patikadev.Helper.DBConnector;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,6 +51,22 @@ public class Content {
 
         }
         return contents;
+    }
+
+    public static boolean add(int courseId, String title, String explanation, String link) {
+        String query = "INSERT INTO content (course_id, title, explanation, link) VALUES (?, ?, ?, ?)";
+
+        try {
+            PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
+            pr.setInt(1, courseId);
+            pr.setString(2, title);
+            pr.setString(3, explanation);
+            pr.setString(4, link);
+
+            return pr.executeUpdate() != -1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public int getId() {
