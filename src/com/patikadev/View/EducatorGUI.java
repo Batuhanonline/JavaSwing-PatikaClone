@@ -6,12 +6,15 @@ import com.patikadev.Helper.Item;
 import com.patikadev.Model.Content;
 import com.patikadev.Model.Course;
 import com.patikadev.Model.Educator;
+import com.patikadev.Model.Quiz;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class EducatorGUI extends JFrame{
     private JPanel wrapper;
@@ -25,11 +28,15 @@ public class EducatorGUI extends JFrame{
     private JComboBox cmb_content_course;
     private JButton btn_course_add;
     private JTextField fld_content_link;
+    private JTable table_quiz_list;
     private DefaultTableModel model_course_list;
     private Object[] row_course_list;
     private DefaultTableModel model_content_list;
     private Object[] row_content_list;
+    private DefaultTableModel model_quiz_list;
+    private Object[] row_quiz_list;
     private JPopupMenu contentMenu;
+    private JPopupMenu quizMenu;
 
     public EducatorGUI(Educator educator) {
         add(wrapper);
@@ -65,7 +72,9 @@ public class EducatorGUI extends JFrame{
 
         contentMenu = new JPopupMenu();
         JMenuItem deleteMenu = new JMenuItem("Sil");
+        JMenuItem addQuestionMenu = new JMenuItem("Soru ekle");
         contentMenu.add(deleteMenu);
+        contentMenu.add(addQuestionMenu);
 
         deleteMenu.addActionListener(e -> {
             if (Helper.confirm("sure")) {
@@ -77,6 +86,17 @@ public class EducatorGUI extends JFrame{
                     Helper.showMsg("error");
                 }
             }
+        });
+
+        addQuestionMenu.addActionListener( e -> {
+            int select_id = Integer.parseInt(table_content_list.getValueAt(table_content_list.getSelectedRow(), 0).toString());
+            AddQuestionGUI addQuestionGUI  = new AddQuestionGUI(select_id);
+            addQuestionGUI.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    loadQuizModel(educator.getId());
+                }
+            });
         });
 
         model_content_list = new DefaultTableModel();
@@ -103,6 +123,47 @@ public class EducatorGUI extends JFrame{
 
         //####ContentList
 
+        //-----------------QuizList
+
+        quizMenu = new JPopupMenu();
+        JMenuItem quizDeleteMenu = new JMenuItem("Sil");
+        quizMenu.add(quizDeleteMenu);
+
+        quizDeleteMenu.addActionListener(e -> {
+            if (Helper.confirm("sure")) {
+                int select_id = Integer.parseInt(table_quiz_list.getValueAt(table_quiz_list.getSelectedRow(), 0).toString());
+                if (Quiz.delete(select_id)) {
+                    Helper.showMsg("succes");
+                    loadQuizModel(educator.getId());
+                } else {
+                    Helper.showMsg("error");
+                }
+            }
+        });
+
+
+        model_quiz_list = new DefaultTableModel();
+        Object[] col_quiz_list = {"ID", "Soru", "Cevap 1", "Cevap 2", "Cevap 3", "Cevap 4", "Cevap"};
+        model_quiz_list.setColumnIdentifiers(col_quiz_list);
+        row_quiz_list = new Object[col_quiz_list.length];
+
+        loadQuizModel(educator.getId());
+
+        table_quiz_list.setModel(model_quiz_list);
+        table_quiz_list.setComponentPopupMenu(quizMenu);
+        table_quiz_list.getColumnModel().getColumn(0).setMaxWidth(75);
+        table_quiz_list.getTableHeader().setReorderingAllowed(false);
+
+        table_quiz_list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Point point = e.getPoint();
+                int selectedRow = table_quiz_list.rowAtPoint(point);
+                table_quiz_list.setRowSelectionInterval(selectedRow, selectedRow);
+            }
+        });
+
+        //####QuizList
 
         btn_close.addActionListener(e -> {
             dispose();
@@ -129,6 +190,25 @@ public class EducatorGUI extends JFrame{
                 }
             }
         });
+    }
+
+    public void loadQuizModel(int educatorId) {
+        DefaultTableModel clearModel = (DefaultTableModel) table_quiz_list.getModel();
+        clearModel.setRowCount(0);
+
+        int i;
+        for (Quiz quiz : Quiz.getListByUserId(educatorId)) {
+            i = 0;
+            row_quiz_list[i++] = quiz.getId();
+            row_quiz_list[i++] = quiz.getQuestion();
+            row_quiz_list[i++] = quiz.getOption1();
+            row_quiz_list[i++] = quiz.getOption2();
+            row_quiz_list[i++] = quiz.getOption3();
+            row_quiz_list[i++] = quiz.getOption4();
+            row_quiz_list[i++] = quiz.getAnswer();
+
+            model_quiz_list.addRow(row_quiz_list);
+        }
     }
 
     private void loadContentModel(int educatorId) {

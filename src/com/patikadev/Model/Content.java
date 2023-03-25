@@ -72,6 +72,13 @@ public class Content {
     public static boolean delete(int selectId) {
         String query = "DELETE FROM content WHERE id = ?";
 
+        ArrayList<Quiz> quizzes = Quiz.getList();
+        for (Quiz quiz : quizzes) {
+            if (quiz.getContentId() == selectId) {
+                Quiz.delete(quiz.getId());
+            }
+        }
+
         try {
             PreparedStatement pr = DBConnector.getInstance().prepareStatement(query);
             pr.setInt(1, selectId);
